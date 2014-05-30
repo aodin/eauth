@@ -9,12 +9,21 @@ import (
 	"time"
 )
 
-// A mechanism should be in place to rotate secret keys
+// TODO A mechanism should be in place to rotate secret keys
+// TODO Multiple domains?
 type Config struct {
+	Domain    string                    `json:"domain"`
+	Secret    string                    `json:"secret"`
+	Https     bool                      `json:"https"`
+	Cookie    CookieConfig              `json:"cookie"`
 	SMTP      map[string]SMTPConfig     `json:"smtp"`
 	Databases map[string]DatabaseConfig `json:"databases"`
-	Cookie    CookieConfig              `json:"cookie"`
-	Secret    string                    `json:"secret"`
+}
+
+var localhost = Config{
+	Domain: "localhost:8008",
+	Secret: "yabbadabbado", // TODO this should NEVER be used
+	Cookie: defaultCookie,
 }
 
 // Cookie names are valid tokens as defined by RFC 2616 section 2.2:
