@@ -19,10 +19,12 @@ func (u User) String() string {
 	return fmt.Sprintf("%d: %s", u.Id, u.Email)
 }
 
-// UserManager is used by the server as the interface a backend must implement.
-// TODO Save should likely return a User or it's impossible to know
-// any auto-create properties
+// UserTest is given a user and returns a bool - user checks use this type
+type UserTest func(u User) bool
 
+// UserManager is the persistance interface for users.
+// TODO Save should return a User or it's impossible to return manager-
+// created attributes.
 type UserManager interface {
 	Save(user User) error
 	Delete(user User) error

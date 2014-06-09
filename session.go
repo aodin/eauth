@@ -71,10 +71,12 @@ func IsValidSession(m SessionManager, key string) bool {
 }
 
 func isValidSession(m SessionManager, key string, now time.Time) bool {
+	// Exploit the fact that Get will return a zero-initialized session if
+	// the key is not valid - that will include a zero timestamp Expires.
 	return m.Get(key).Expires.After(now)
 }
 
-// The persistance layer for sessions
+// SessionManager is the persistance interface for sessions.
 type SessionManager interface {
 	Save(session Session) error
 	Delete(key string) error

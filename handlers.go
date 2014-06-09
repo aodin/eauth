@@ -1,6 +1,7 @@
 package eauth
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -13,28 +14,70 @@ type Server struct {
 	sessions SessionManager
 }
 
-func (s *Server) Secrets(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("secrets!"))
-}
-
 func (s *Server) LoginRequired(h http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// Get the session key from cookie
+		// Get the session key from the cookie
 		cookie, err := r.Cookie(s.config.Cookie.Name)
+
 		// Check if the session is valid
 		if err != nil || !IsValidSession(s.sessions, cookie.Value) {
-			w.Write([]byte("redirect!"))
+			w.Write([]byte("Login Required"))
 			return
 		}
+
+		// Execute the wrapped handler
 		h(w, r)
 	}
 }
 
-// This is a massive security hole if left enabled
-func (s *Server) Generate(w http.ResponseWriter, r *http.Request) {
-	// Generate a new link for user 1
-	link := CreateLink(s.config, s.users.Get(1))
-	w.Write([]byte(link))
+// func (s *Server) UserIs(test UserTest, h http.HandlerFunc) http.HandlerFunc {
+// 	return func(w http.ResponseWriter, r *http.Request) {
+// 		// Get the session key from the cookie
+// 		cookie, err := r.Cookie(s.config.Cookie.Name)
+
+// 		// TODO Get the user for the given session
+// 	}
+// }
+
+var emailForm = []byte(`<!DOCTYPE html>
+<html>
+	<body>
+		<form method="POST">
+			<input type="email" name="email" placeholder="Enter your email">
+			<input type="submit">
+		</form>
+	</body>
+</html>`)
+
+var emailBody = []byte(``)
+
+// Send email will send a auth link to the given email address if the given
+// POST data contains a valid user email.
+func (s *Server) SendEmail(w http.ResponseWriter, r *http.Request) {
+	// If
+	if strings.ToUpper(r.Method) == "POST" {
+		email := r.FormValue("email")
+		w.Write([]byte(email))
+		w.Write([]byte("\n"))
+
+		// TODO Email normalization
+		user := s.users.GetEmail(email)
+		if user.Id == 0 {
+			w.Write([]byte("Invalid user"))
+			return
+		}
+
+		w.Write([]byte(fmt.Sprint(user)))
+		w.Write([]byte("\n"))
+
+		// TODO email this link!
+		link := CreateLink(s.config, s.users.Get(1))
+		w.Write([]byte(link))
+		return
+	}
+
+	// TODO How to make the templates extensible?
+	w.Write(emailForm)
 }
 
 func (s *Server) Authenticate(w http.ResponseWriter, r *http.Request) {
@@ -102,8 +145,7 @@ func NewServer(c Config, u UserManager, s SessionManager) *Server {
 	}
 
 	// Attach the handlers
-	http.HandleFunc("/", srv.LoginRequired(srv.Secrets))
-	http.HandleFunc("/gen/", srv.Generate)
+	http.HandleFunc("/login/", srv.SendEmail)
 	http.HandleFunc("/auth/", srv.Authenticate)
 	return srv
 }
