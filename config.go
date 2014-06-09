@@ -110,5 +110,10 @@ func parse(f io.Reader) (Config, error) {
 		return c, err
 	}
 	// TODO Allow flag values to override configuration?
+
+	// Fall back to the default cookie if none was set
+	if c.Cookie.Name == "" {
+		c.Cookie = defaultCookie
+	}
 	return c, nil
 }

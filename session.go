@@ -65,6 +65,15 @@ func newSession(m SessionManager, key KeyFunc, uid int64, c CookieConfig) (Sessi
 	return session, nil
 }
 
+// IsValidSession checks if a session key exists in the given manager.
+func IsValidSession(m SessionManager, key string) bool {
+	return isValidSession(m, key, time.Now())
+}
+
+func isValidSession(m SessionManager, key string, now time.Time) bool {
+	return m.Get(key).Expires.After(now)
+}
+
 // The persistance layer for sessions
 type SessionManager interface {
 	Save(session Session) error
