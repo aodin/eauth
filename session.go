@@ -37,7 +37,7 @@ func NewSession(m SessionManager, uid int64, c CookieConfig) (Session, error) {
 	return newSession(m, RandomKey, uid, c)
 }
 
-func newSession(m SessionManager, generate KeyFunc, uid int64, c CookieConfig) (Session, error) {
+func newSession(m SessionManager, key KeyFunc, uid int64, c CookieConfig) (Session, error) {
 	// Start a new session
 	session := Session{
 		UserId: uid,
@@ -48,7 +48,7 @@ func newSession(m SessionManager, generate KeyFunc, uid int64, c CookieConfig) (
 	// Generate a new session key
 	var err error
 	for {
-		session.Key, err = generate()
+		session.Key, err = key()
 		if err != nil {
 			return session, err
 		}
@@ -59,7 +59,7 @@ func newSession(m SessionManager, generate KeyFunc, uid int64, c CookieConfig) (
 		}
 	}
 
-	if err = m.Create(session); err != nil {
+	if err = m.Save(session); err != nil {
 		return session, err
 	}
 	return session, nil
@@ -67,7 +67,7 @@ func newSession(m SessionManager, generate KeyFunc, uid int64, c CookieConfig) (
 
 // The persistance layer for sessions
 type SessionManager interface {
-	Create(session Session) error
+	Save(session Session) error
 	Delete(key string) error
 	Get(key string) Session
 }

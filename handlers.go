@@ -13,7 +13,7 @@ type Server struct {
 // This is a massive security hole if left enabled
 func (s *Server) Generate(w http.ResponseWriter, r *http.Request) {
 	// Generate a new link for user 1
-	link := CreateLink(s.config, s.users.GetId(1))
+	link := CreateLink(s.config, s.users.Get(1))
 	w.Write([]byte(link))
 }
 
@@ -29,19 +29,13 @@ func (s *Server) ListenAndServe() error {
 	return http.ListenAndServe(s.config.Domain, nil)
 }
 
-func NewServer(config Config) (s *Server) {
-	s.config = config
-	s.users = InMemoryUsers()
-	s.sessions = InMemorySessions()
-
-	// Attach a test user
-	admin := User{}
-	if err := s.users.Create(admin); err != nil {
-		panic(err)
-	}
+func NewServer(config Config, u UserManager, s SessionManager) (srv *Server) {
+	srv.config = config
+	srv.users = u
+	srv.sessions = s
 
 	// Attach the handlers
-	http.HandleFunc("/gen/", s.Generate)
-	http.HandleFunc("/auth/", s.Authenticate)
+	http.HandleFunc("/gen/", srv.Generate)
+	http.HandleFunc("/auth/", srv.Authenticate)
 	return
 }
