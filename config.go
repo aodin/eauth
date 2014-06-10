@@ -12,12 +12,12 @@ import (
 // TODO A mechanism should be in place to rotate secret keys
 // TODO Multiple domains?
 type Config struct {
-	Domain    string                    `json:"domain"`
-	Secret    string                    `json:"secret"`
-	Https     bool                      `json:"https"`
-	Cookie    CookieConfig              `json:"cookie"`
-	SMTP      map[string]SMTPConfig     `json:"smtp"`
-	Databases map[string]DatabaseConfig `json:"databases"`
+	Domain    string         `json:"domain"`
+	Secret    string         `json:"secret"`
+	Https     bool           `json:"https"`
+	Cookie    CookieConfig   `json:"cookie"`
+	SMTP      SMTPConfig     `json:"smtp"`
+	Databases DatabaseConfig `json:"database"`
 }
 
 var localhost = Config{

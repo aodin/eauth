@@ -66,10 +66,17 @@ func (s *Server) SendEmail(w http.ResponseWriter, r *http.Request) {
 
 		// Create the auth link
 		link := CreateLink(s.config, user)
-		w.Write([]byte(link))
 
+		w.Write([]byte("Sending email"))
 		// Email the link
-
+		go func() {
+			Send(
+				s.config.SMTP,
+				[]string{user.Email},
+				"Auth",
+				link,
+			)
+		}()
 		return
 	}
 
