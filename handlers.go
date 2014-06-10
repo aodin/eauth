@@ -1,7 +1,6 @@
 package eauth
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -57,8 +56,6 @@ func (s *Server) SendEmail(w http.ResponseWriter, r *http.Request) {
 	// If
 	if strings.ToUpper(r.Method) == "POST" {
 		email := r.FormValue("email")
-		w.Write([]byte(email))
-		w.Write([]byte("\n"))
 
 		// TODO Email normalization
 		user := s.users.GetEmail(email)
@@ -67,12 +64,12 @@ func (s *Server) SendEmail(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		w.Write([]byte(fmt.Sprint(user)))
-		w.Write([]byte("\n"))
-
-		// TODO email this link!
-		link := CreateLink(s.config, s.users.Get(1))
+		// Create the auth link
+		link := CreateLink(s.config, user)
 		w.Write([]byte(link))
+
+		// Email the link
+
 		return
 	}
 

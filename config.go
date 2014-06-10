@@ -64,6 +64,10 @@ func (c SMTPConfig) FromAddress() string {
 	return fmt.Sprintf("<%s>", c.From)
 }
 
+func (c SMTPConfig) HostWithPort() string {
+	return fmt.Sprintf("%s:%d", c.Host, c.Port)
+}
+
 type DatabaseConfig struct {
 	Driver   string `json:"driver"`
 	Host     string `json:"host"`
